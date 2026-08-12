@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline-lg: "Libre Caslon Text", serif;
+  --font-headline-md: "Libre Caslon Text", serif;
+  --font-headline-lg-mobile: "Libre Caslon Text", serif;
+  --font-body-md: "Manrope", sans-serif;
+  --font-body-lg: "Manrope", sans-serif;
+  --font-label-md: "Manrope", sans-serif;
+  --font-label-sm: "Manrope", sans-serif;
+
+  --color-primary: #0a0a0a;
+  --color-primary-container: #121212;
+  --color-primary-fixed-dim: #c29c6d;
+  --color-secondary: #c29c6d;
+  --color-secondary-fixed: #d4b187;
+  --color-secondary-fixed-dim: #8e6e4a;
+  --color-secondary-container: #1c1810;
+  --color-on-secondary-container: #c29c6d;
+  --color-on-secondary-fixed: #0a0a0a;
+  --color-surface: #0a0a0a;
+  --color-surface-container-lowest: #080808;
+  --color-surface-container-low: #0f0f0f;
+  --color-surface-container: #121212;
+  --color-surface-container-high: #181818;
+  --color-surface-container-highest: #222222;
+  --color-surface-variant: #1a1a1a;
+  --color-on-surface: #f2f2f2;
+  --color-on-surface-variant: #a0a0a0;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #0a0a0a;
+  --color-outline-variant: #2a2a2a;
+  --color-tertiary-container: #141414;
+  --color-on-tertiary-container: #a0a0a0;
+}
+
+@layer base {
+  html {
+    font-size: 86%; /* Reduces baseline scale by ~15% for compact, high-density layout */
+  }
+
+  body {
+    background-color: #FAFAFC;
+    color: #0F172A;
+    font-family: "Manrope", sans-serif;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Material Design 3 & Custom App Typography Rules */
+.text-app-logo { font-size: 22px; font-weight: 700; }
+.text-page-title { font-size: 20px; font-weight: 700; line-height: 1.25; }
+.text-section-heading { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.text-card-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.text-body { font-size: 13px; font-weight: 400; line-height: 1.5; }
+.text-btn { font-size: 14px; font-weight: 600; }
+.text-nav { font-size: 12px; font-weight: 600; }
+.text-form-label { font-size: 12px; font-weight: 600; }
+.text-input { font-size: 14px; font-weight: 400; }
+.text-price { font-size: 15px; font-weight: 600; }
+.text-badge { font-size: 11px; font-weight: 700; }
+.text-helper { font-size: 11px; font-weight: 400; }
+.text-footer { font-size: 10px; font-weight: 400; }
+
+.font-headline-lg,
+.font-headline-md,
+.font-headline-lg-mobile {
+  font-family: "Libre Caslon Text", serif;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Premium FabriQ Ai Glow & Emboss Utilities */
+.fabriq-glow {
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fabriq-glow:hover {
+  box-shadow: 0 0 25px rgba(217, 119, 6, 0.55), 0 0 10px rgba(251, 191, 36, 0.3);
+  transform: translateY(-1px);
+}
+
+.fabriq-glow:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 12px rgba(217, 119, 6, 0.4);
+  transform: scale(0.97);
+}
+
+.fabriq-emboss {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 4px 10px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s ease;
+}
+
+.fabriq-emboss:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 6px 15px rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+.fabriq-emboss:active {
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: scale(0.98);
+}
+
+/* Tactile Press State utilities for mobile & desktop */
+.btn-press {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-press:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.card-press {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-press:active {
+  transform: scale(0.98);
+}
+
+/* Dark Mode Theme Overrides */
+.dark body {
+  background-color: #0A0A0E;
+  color: #F1F5F9;
+}
+
+.dark .bg-white {
+  background-color: #12121A !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #181824 !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #1E1E2E !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-800 {
+  color: #F8FAFC !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: #CBD5E1 !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100 {
+  border-color: #2E2E42 !important;
+}
+
+/* Keyframes for Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 22s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Keyframes for Heart-Pulse scale & color animation */
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.28); }
+  40% { transform: scale(0.95); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1.08); }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+

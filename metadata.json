@@ -1,0 +1,6 @@
+{
+  "name": "FabriQ Ai",
+  "description": "Luxury AI-powered garment care, dry cleaning, bespoke fabric care, and concierge service.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
