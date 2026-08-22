@@ -1,8 +1,358 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return isSignedIn() && request.auth.token.role != null ? request.auth.token.role : 'customer';
+    }
+
+    function isCorporateAdmin() {
+      return isSignedIn() && (
+        getUserRole() == 'super_admin' ||
+        getUserRole() == 'ceo' ||
+        getUserRole() == 'owner' ||
+        getUserRole() == 'mis' ||
+        getUserRole() == 'finance'
+      );
+    }
+
+    function isFranchiseAdmin(franchiseId) {
+      return isCorporateAdmin() || (
+        isSignedIn() && (
+          getUserRole() == 'franchise_owner' ||
+          getUserRole() == 'regional_manager'
+        ) && (request.auth.token.franchiseId == franchiseId || resource.data.franchiseId == request.auth.token.franchiseId)
+      );
+    }
+
+    function isBranchAuthorized(branchId) {
+      return isCorporateAdmin() || (
+        isSignedIn() && (
+          request.auth.token.branchId == branchId ||
+          resource.data.branchId == request.auth.token.branchId ||
+          request.resource.data.branchId == request.auth.token.branchId
+        )
+      );
+    }
+
+    function isOrderOwnerOrStaff() {
+      return isSignedIn() && (
+        isCorporateAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid ||
+        (request.auth.token.branchId != null && resource.data.branchId == request.auth.token.branchId)
+      );
+    }
+
+    function tenantFieldsUnchanged() {
+      return request.resource.data.orgId == resource.data.orgId &&
+             request.resource.data.divisionId == resource.data.divisionId &&
+             request.resource.data.branchId == resource.data.branchId;
+    }
+
+    // Default deny catch-all
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
+    }
+
+    // Users Collection - Isolation by userId or Corporate Admin
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isCorporateAdmin();
+      allow create: if isSignedIn();
+      allow update: if (isOwner(userId) || isCorporateAdmin()) &&
+                     (!('role' in request.resource.data) || isCorporateAdmin() || request.resource.data.role == resource.data.role);
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Orders Collection - Isolation by userId, Branch, Franchise or Corporate Admin
+    match /orders/{orderId} {
+      allow read: if isCorporateAdmin() ||
+                   (isSignedIn() && resource.data.userId == request.auth.uid) ||
+                   (isSignedIn() && request.auth.token.branchId != null && resource.data.branchId == request.auth.token.branchId) ||
+                   (isSignedIn() && request.auth.token.franchiseId != null && resource.data.franchiseId == request.auth.token.franchiseId);
+
+      allow create: if isSignedIn() &&
+                    request.resource.data.userId == request.auth.uid;
+
+      allow update: if isSignedIn() &&
+                    isOrderOwnerOrStaff() &&
+                    tenantFieldsUnchanged();
+
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Organizations, Divisions, Franchises, Branches Hierarchy
+    match /organizations/{orgId} {
+      allow read: if isSignedIn();
+      allow write: if isCorporateAdmin();
+
+      match /divisions/{divisionId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin();
+      }
+
+      match /franchises/{franchiseId} {
+        allow read: if isCorporateAdmin() || isFranchiseAdmin(franchiseId);
+        allow write: if isCorporateAdmin();
+
+        match /agreements/{agreementId} {
+          allow read: if isCorporateAdmin() || isFranchiseAdmin(franchiseId);
+          allow write: if isCorporateAdmin();
+        }
+      }
+
+      match /branches/{branchId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId);
+      }
+
+      // Enterprise Inventory Collections
+      match /warehouses/{warehouseId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin();
+      }
+
+      match /inventory_items/{itemId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('inventory');
+      }
+
+      match /stock_balances/{stockId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || resource.data.franchiseId == null || isFranchiseAdmin(resource.data.franchiseId));
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager') || (isFranchiseAdmin(resource.data.franchiseId));
+      }
+
+      // Auditable Stock Movements Ledger - Immutable ledger entries (creation allowed, updates/deletes prohibited)
+      match /stock_movements/{movementId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || resource.data.franchiseId == null || isFranchiseAdmin(resource.data.franchiseId));
+        allow create: if isSignedIn() && (isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager') || isFranchiseAdmin(request.resource.data.franchiseId));
+        allow update, delete: if false;
+      }
+
+      match /suppliers/{supplierId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('inventory');
+      }
+
+      match /reorder_rules/{ruleId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager');
+      }
+
+      // Phase 2C Commercial & Royalty Collections
+      match /commercial_agreements/{agreementVersionId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Normalized Revenue Events Ledger - Immutable (creation allowed, update/delete denied)
+      match /commercial_events/{eventId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId));
+        allow create: if isSignedIn() && (isCorporateAdmin() || hasRole('finance') || hasRole('store_manager') || isFranchiseAdmin(request.resource.data.franchiseId));
+        allow update, delete: if false;
+      }
+
+      // Franchise Settlement Statements
+      match /franchise_settlements/{settlementId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Phase 2D Enterprise Finance Collections
+      // Revenue Ledger - Append-only, creation allowed, update/delete denied
+      match /revenue_ledger/{ledgerId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager'));
+        allow create: if isSignedIn() && (isCorporateAdmin() || hasRole('finance') || hasRole('store_manager'));
+        allow update, delete: if false;
+      }
+
+      // Payment Reconciliations
+      match /payment_reconciliations/{reconciliationId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('finance') || hasRole('store_manager'));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Financial Refunds & Adjustments
+      match /financial_refunds/{adjustmentId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('finance') || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager'));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Financial Accounting Periods
+      match /financial_periods/{periodId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Financial Audit Logs - Immutable append-only
+      match /financial_audit_logs/{auditId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('finance'));
+        allow create: if isSignedIn();
+        allow update, delete: if false;
+      }
+
+      // Franchise Financial Statements
+      match /franchise_financial_statements/{statementId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Phase 2E Enterprise Procurement Collections
+      match /vendors/{vendorId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('finance');
+      }
+
+      match /procurement_items/{itemId} {
+        allow read: if isSignedIn();
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager');
+      }
+
+      match /purchase_requisitions/{reqId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager') || hasRole('inventory'));
+        allow write: if isSignedIn() && (isCorporateAdmin() || hasRole('store_manager') || hasRole('inventory') || isFranchiseAdmin(request.resource.data.franchiseId));
+      }
+
+      match /purchase_orders/{poId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager') || hasRole('inventory') || hasRole('finance'));
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('finance');
+      }
+
+      match /goods_receipts/{grnId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager') || hasRole('inventory'));
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager');
+      }
+
+      match /purchase_returns/{returnId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || isFranchiseAdmin(resource.data.franchiseId) || hasRole('store_manager') || hasRole('inventory'));
+        allow write: if isCorporateAdmin() || hasRole('inventory') || hasRole('store_manager') || hasRole('finance');
+      }
+
+      match /vendor_invoices/{invoiceId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('finance') || isFranchiseAdmin(resource.data.franchiseId));
+        allow write: if isCorporateAdmin() || hasRole('finance');
+      }
+
+      // Procurement Audit Logs - Immutable append-only
+      match /procurement_audit_logs/{auditId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('inventory') || hasRole('finance'));
+        allow create: if isSignedIn();
+        allow update, delete: if false;
+      }
+    }
+
+    // Audit Logs - Immutable logs; creation allowed for signed-in users, updates/deletions denied
+    match /audit_logs/{logId} {
+      allow read: if isCorporateAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // AI Platform Inspections & Protocols - Multi-tenant shared AI records
+    match /ai_inspections/{inspectionId} {
+      allow read: if isSignedIn() && (isCorporateAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Distributed Persistent Idempotency Records
+    match /idempotency_records/{key} {
+      allow read: if isSignedIn() && (isCorporateAdmin() || resource.data.userId == request.auth.uid);
+      allow create, update: if isSignedIn();
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Persistent Tax Classifications (HSN & SAC Master)
+    match /tax_classifications/{classificationId} {
+      allow read: if isSignedIn();
+      allow write: if isCorporateAdmin() || hasRole('finance');
+    }
+
+    // Persistent Tax Schedules & Versions
+    match /tax_schedules/{taxScheduleId} {
+      allow read: if isSignedIn();
+      allow write: if isCorporateAdmin() || hasRole('finance');
+    }
+
+    // Tax Configuration Audit Records - Append-only immutable
+    match /tax_audit_records/{auditId} {
+      allow read: if isSignedIn() && (isCorporateAdmin() || hasRole('finance'));
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Bespoke Customer Measurements Collection
+    match /customer_measurements/{measurementProfileId} {
+      allow read: if isSignedIn() && (
+        resource == null ||
+        resource.data.customerId == request.auth.uid ||
+        isCorporateAdmin() ||
+        hasRole('store_staff') ||
+        hasRole('quality_inspector') ||
+        hasRole('store_manager')
+      );
+      allow create: if isSignedIn() && (
+        request.resource.data.customerId == request.auth.uid ||
+        isCorporateAdmin() ||
+        hasRole('store_staff') ||
+        hasRole('store_manager')
+      );
+      allow update: if isSignedIn() && (
+        resource.data.customerId == request.auth.uid ||
+        isCorporateAdmin() ||
+        hasRole('store_staff') ||
+        hasRole('store_manager')
+      );
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Order Inventory Requirements & Deduction Tracking Collection
+    match /order_inventory_requirements/{requirementId} {
+      allow read: if isSignedIn() && (
+        isCorporateAdmin() ||
+        hasRole('inventory') ||
+        hasRole('store_staff') ||
+        hasRole('store_manager') ||
+        hasRole('regional_manager') ||
+        hasRole('franchise_owner')
+      );
+      allow create, update: if isSignedIn() && (
+        isCorporateAdmin() ||
+        hasRole('inventory') ||
+        hasRole('store_staff') ||
+        hasRole('store_manager') ||
+        hasRole('regional_manager') ||
+        hasRole('franchise_owner')
+      );
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Catalog Images & High-Definition Garment Visuals Collection
+    match /catalog_images/{imageId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() || true;
+      allow delete: if isCorporateAdmin();
+    }
+
+    // Cryptographic Multi-Tenant Audit Chains - Append-only server authority, client write prohibited
+    match /audit_chains/{tenantScope} {
+      allow read: if isSignedIn() && (isCorporateAdmin() || (request.auth.token.orgId == tenantScope && (hasRole('finance') || hasRole('mis') || hasRole('owner'))));
+      allow write: if false;
+
+      match /records/{recordId} {
+        allow read: if isSignedIn() && (isCorporateAdmin() || (request.auth.token.orgId == tenantScope && (hasRole('finance') || hasRole('mis') || hasRole('owner'))));
+        allow write: if false;
+      }
     }
   }
 }
+
