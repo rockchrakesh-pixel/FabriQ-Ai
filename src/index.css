@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline-lg: "Libre Caslon Text", serif;
+  --font-headline-md: "Libre Caslon Text", serif;
+  --font-headline-lg-mobile: "Libre Caslon Text", serif;
+  --font-body-md: "Manrope", sans-serif;
+  --font-body-lg: "Manrope", sans-serif;
+  --font-label-md: "Manrope", sans-serif;
+  --font-label-sm: "Manrope", sans-serif;
+
+  --color-primary: #1C1917;
+  --color-primary-container: #F5F1EB;
+  --color-primary-fixed-dim: #c29c6d;
+  --color-secondary: #c29c6d;
+  --color-secondary-fixed: #d4b187;
+  --color-secondary-fixed-dim: #8e6e4a;
+  --color-secondary-container: #FBF8F3;
+  --color-on-secondary-container: #83633B;
+  --color-on-secondary-fixed: #1C1917;
+  --color-surface: #FFFFFF;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #FAF8F5;
+  --color-surface-container: #F5F1EB;
+  --color-surface-container-high: #EFE9E0;
+  --color-surface-container-highest: #E5DDD2;
+  --color-surface-variant: #F5F1EB;
+  --color-on-surface: #1E1B18;
+  --color-on-surface-variant: #64748B;
+  --color-on-primary: #ffffff;
+  --color-on-secondary: #ffffff;
+  --color-outline-variant: #E6DDD1;
+  --color-tertiary-container: #FBF8F3;
+  --color-on-tertiary-container: #83633B;
+}
+
+@layer base {
+  html {
+    font-size: 86%; /* Reduces baseline scale by ~15% for compact, high-density layout */
+  }
+
+  body {
+    background-color: #FAF8F5;
+    color: #1E1B18;
+    font-family: "Manrope", sans-serif;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Material Design 3 & Custom App Typography Rules */
+.text-app-logo { font-size: 22px; font-weight: 700; }
+.text-page-title { font-size: 20px; font-weight: 700; line-height: 1.25; }
+.text-section-heading { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.text-card-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.text-body { font-size: 13px; font-weight: 400; line-height: 1.5; }
+.text-btn { font-size: 14px; font-weight: 600; }
+.text-nav { font-size: 12px; font-weight: 600; }
+.text-form-label { font-size: 12px; font-weight: 600; }
+.text-input { font-size: 14px; font-weight: 400; }
+.text-price { font-size: 15px; font-weight: 600; }
+.text-badge { font-size: 11px; font-weight: 700; }
+.text-helper { font-size: 11px; font-weight: 400; }
+.text-footer { font-size: 10px; font-weight: 400; }
+
+.font-headline-lg,
+.font-headline-md,
+.font-headline-lg-mobile {
+  font-family: "Libre Caslon Text", serif;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Premium FabriQ Ai Glow & Emboss Utilities */
+.fabriq-glow {
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fabriq-glow:hover {
+  box-shadow: 0 0 25px rgba(217, 119, 6, 0.55), 0 0 10px rgba(251, 191, 36, 0.3);
+  transform: translateY(-1px);
+}
+
+.fabriq-glow:active {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 12px rgba(217, 119, 6, 0.4);
+  transform: scale(0.97);
+}
+
+.fabriq-emboss {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 4px 10px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s ease;
+}
+
+.fabriq-emboss:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.3), 0 6px 15px rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+.fabriq-emboss:active {
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+  transform: scale(0.98);
+}
+
+/* Tactile Press State utilities for mobile & desktop */
+.btn-press {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-press:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+.card-press {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-press:active {
+  transform: scale(0.98);
+}
+
+/* Dark Mode Theme Overrides & High Contrast Readability */
+.dark body {
+  background-color: #080C14;
+  color: #F8FAFC;
+}
+
+.dark .bg-white {
+  background-color: #0E1726 !important;
+}
+
+.dark [class*="bg-[#FAF8F5]"],
+.dark [class*="bg-[#FAF9F6]"],
+.dark [class*="bg-[#FAFAFC]"] {
+  background-color: #080C14 !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #111C30 !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #17243D !important;
+}
+
+.dark .bg-amber-50 {
+  background-color: #1B2436 !important;
+}
+
+/* Ensure all headings, text, and customer/service names are ultra-crisp & bright in Dark Mode */
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark [class*="text-[#1C1917]"],
+.dark [class*="text-[#0B1528]"],
+.dark [class*="text-[#1E1B18]"] {
+  color: #F8FAFC !important;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600,
+.dark [class*="text-[#57534E]"] {
+  color: #CBD5E1 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94A3B8 !important;
+}
+
+.dark [class*="text-[#83633B]"] {
+  color: #E5C07B !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100,
+.dark [class*="border-[#E5DDD2]"],
+.dark [class*="border-[#F0EBE1]"] {
+  border-color: #1F2D48 !important;
+}
+
+/* Keyframes for Luxury Gold Dust Particle Animation */
+@keyframes goldDustFloat {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.4) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -10px) scale(1.1) rotate(45deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translate(calc(-50% + 15px), -50px) scale(0.9) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% - 20px), -100px) scale(0.2) rotate(180deg);
+  }
+}
+
+/* Keyframes for Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 22s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Keyframes for Heart-Pulse scale & color animation */
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.28); }
+  40% { transform: scale(0.95); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1.08); }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+

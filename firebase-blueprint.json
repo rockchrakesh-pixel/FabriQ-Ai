@@ -1,0 +1,594 @@
+{
+  "entities": {
+    "Organization": {
+      "title": "Organization Enterprise Record",
+      "description": "Master Organization tenant entity overseeing multi-region operations",
+      "type": "object",
+      "properties": {
+        "orgId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 150 },
+        "taxId": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["orgId", "name"]
+    },
+    "Division": {
+      "title": "FabriQ Division",
+      "description": "Operating Division (e.g. FabriQ AI, FabriQ Boutique, FabriQ Luxury Store, or future extensions)",
+      "type": "object",
+      "properties": {
+        "divisionId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionCode": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string" }
+      },
+      "required": ["divisionId", "orgId", "divisionCode", "name"]
+    },
+    "Franchise": {
+      "title": "Franchise Entity",
+      "description": "Franchise legal entity operating one or more store branches under contract",
+      "type": "object",
+      "properties": {
+        "franchiseId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "franchiseName": { "type": "string", "maxLength": 150 },
+        "legalEntityName": { "type": "string", "maxLength": 150 },
+        "ownerName": { "type": "string" },
+        "ownerEmail": { "type": "string", "maxLength": 100 },
+        "ownerPhone": { "type": "string", "maxLength": 30 },
+        "territory": { "type": "string" },
+        "country": { "type": "string" },
+        "stateRegion": { "type": "string" },
+        "city": { "type": "string" },
+        "status": { "type": "string" },
+        "agreementRefId": { "type": "string" },
+        "agreementStartDate": { "type": "string" },
+        "agreementEndDate": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["franchiseId", "orgId", "franchiseName", "ownerEmail", "city"]
+    },
+    "FranchiseAgreement": {
+      "title": "Franchise Agreement Version",
+      "description": "Versioned franchise legal agreement specifying royalty models and terms",
+      "type": "object",
+      "properties": {
+        "agreementId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "status": { "type": "string" },
+        "effectiveDate": { "type": "string" },
+        "expiryDate": { "type": "string" },
+        "territory": { "type": "string" },
+        "royaltyModel": { "type": "string" },
+        "royaltyPercentage": { "type": "number" },
+        "fixedFee": { "type": "number" },
+        "settlementFrequency": { "type": "string" },
+        "currency": { "type": "string" },
+        "paymentTerms": { "type": "string" },
+        "version": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["agreementId", "franchiseId", "orgId", "status", "version"]
+    },
+    "Branch": {
+      "title": "Physical Branch / Store Location",
+      "description": "Store atelier or collection counter belonging to a franchise or corporate org",
+      "type": "object",
+      "properties": {
+        "branchId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 150 },
+        "city": { "type": "string" },
+        "address": { "type": "string", "maxLength": 300 },
+        "status": { "type": "string" }
+      },
+      "required": ["branchId", "orgId", "name", "city"]
+    },
+    "Warehouse": {
+      "title": "Central or Regional Warehouse",
+      "description": "Warehouse facility storing inventory for divisions or corporate org",
+      "type": "object",
+      "properties": {
+        "warehouseId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "name": { "type": "string" },
+        "city": { "type": "string" },
+        "address": { "type": "string" },
+        "isCentral": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["warehouseId", "orgId", "divisionId", "name"]
+    },
+    "InventoryItem": {
+      "title": "Master Inventory Item / Catalog SKU",
+      "description": "Enterprise shared item catalog across laundry, boutique, and luxury divisions",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "unitOfMeasure": { "type": "string" },
+        "unitCost": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "brand": { "type": "string" },
+        "styleCode": { "type": "string" },
+        "color": { "type": "string" },
+        "size": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["itemId", "orgId", "divisionId", "sku", "name", "category"]
+    },
+    "StockBalance": {
+      "title": "Branch or Warehouse Stock Balance",
+      "description": "Current on-hand stock balance at a physical branch or central warehouse",
+      "type": "object",
+      "properties": {
+        "stockId": { "type": "string" },
+        "itemId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "warehouseId": { "type": "string" },
+        "locationType": { "type": "string" },
+        "locationName": { "type": "string" },
+        "currentQuantity": { "type": "number" },
+        "reservedQuantity": { "type": "number" },
+        "availableQuantity": { "type": "number" },
+        "minStockLevel": { "type": "number" },
+        "reorderLevel": { "type": "number" },
+        "targetStockLevel": { "type": "number" },
+        "reorderQuantity": { "type": "number" },
+        "preferredSupplierId": { "type": "string" },
+        "lastRestockedAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["stockId", "itemId", "orgId", "divisionId", "locationType", "currentQuantity"]
+    },
+    "StockMovement": {
+      "title": "Auditable Stock Movement Ledger Entry",
+      "description": "Immutable ledger tracking stock movement transactions (Receipt, Consumption, Transfer, Sale, Return, Damage, Adjustment)",
+      "type": "object",
+      "properties": {
+        "movementId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "warehouseId": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemName": { "type": "string" },
+        "movementType": { "type": "string" },
+        "quantity": { "type": "number" },
+        "previousQuantity": { "type": "number" },
+        "resultingQuantity": { "type": "number" },
+        "unitCost": { "type": "number" },
+        "sourceLocationId": { "type": "string" },
+        "destinationLocationId": { "type": "string" },
+        "reason": { "type": "string" },
+        "referenceDocId": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["movementId", "orgId", "divisionId", "itemId", "movementType", "quantity", "userId", "timestamp"]
+    },
+    "Supplier": {
+      "title": "Master Supplier Record",
+      "description": "Supplier information for inventory restocking and procurement foundation",
+      "type": "object",
+      "properties": {
+        "supplierId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "name": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "city": { "type": "string" },
+        "leadTimeDays": { "type": "number" },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["supplierId", "orgId", "name", "email"]
+    },
+    "ReorderRule": {
+      "title": "Reorder Rule Configuration",
+      "description": "Reorder threshold configuration for items at branches or warehouses",
+      "type": "object",
+      "properties": {
+        "ruleId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "itemId": { "type": "string" },
+        "locationId": { "type": "string" },
+        "locationType": { "type": "string" },
+        "minStockLevel": { "type": "number" },
+        "reorderLevel": { "type": "number" },
+        "reorderQuantity": { "type": "number" },
+        "preferredSupplierId": { "type": "string" },
+        "autoTriggerEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["ruleId", "orgId", "divisionId", "itemId", "locationId", "minStockLevel", "reorderLevel"]
+    },
+    "VersionedCommercialAgreement": {
+      "title": "Versioned Franchise Commercial Agreement",
+      "description": "Immutable versioned commercial agreement governing franchise royalty terms",
+      "type": "object",
+      "properties": {
+        "agreementVersionId": { "type": "string" },
+        "agreementId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "version": { "type": "string" },
+        "status": { "type": "string" },
+        "effectiveDate": { "type": "string" },
+        "expiryDate": { "type": "string" },
+        "royaltyModel": { "type": "string" },
+        "royaltyPercentage": { "type": "number" },
+        "currency": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["agreementVersionId", "agreementId", "franchiseId", "orgId", "version", "royaltyModel", "currency"]
+    },
+    "CommercialRevenueEvent": {
+      "title": "Normalized Commercial Revenue Event",
+      "description": "Normalized commercial revenue transaction event with idempotency tracking and integer minor units",
+      "type": "object",
+      "properties": {
+        "eventId": { "type": "string" },
+        "idempotencyKey": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "isCorporateOwned": { "type": "boolean" },
+        "orderId": { "type": "string" },
+        "eventType": { "type": "string" },
+        "grossAmountInMinorUnits": { "type": "number" },
+        "netAmountInMinorUnits": { "type": "number" },
+        "eligibleRevenueInMinorUnits": { "type": "number" },
+        "currency": { "type": "string" },
+        "agreementVersionId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["eventId", "idempotencyKey", "orgId", "divisionId", "branchId", "orderId", "eventType", "grossAmountInMinorUnits", "currency", "timestamp"]
+    },
+    "FranchiseSettlement": {
+      "title": "Franchise Royalty Settlement Statement",
+      "description": "Period settlement statement tracking eligible revenue, calculated royalty, adjustments, and lifecycle status",
+      "type": "object",
+      "properties": {
+        "settlementId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "agreementVersionId": { "type": "string" },
+        "settlementPeriod": { "type": "string" },
+        "currency": { "type": "string" },
+        "grossRevenueInMinorUnits": { "type": "number" },
+        "eligibleRevenueInMinorUnits": { "type": "number" },
+        "royaltyAmountInMinorUnits": { "type": "number" },
+        "netSettlementInMinorUnits": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["settlementId", "orgId", "franchiseId", "agreementVersionId", "settlementPeriod", "currency", "status"]
+    },
+    "RevenueLedgerEntry": {
+      "title": "Enterprise Revenue Ledger Entry",
+      "description": "Controlled financial ledger entry capturing recognized revenue, discounts, taxes, and net revenue",
+      "type": "object",
+      "properties": {
+        "ledgerId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "currency": { "type": "string" },
+        "grossAmountInMinorUnits": { "type": "number" },
+        "netRevenueInMinorUnits": { "type": "number" },
+        "finalRecognizedAmountInMinorUnits": { "type": "number" },
+        "status": { "type": "string" },
+        "financialPeriodId": { "type": "string" }
+      },
+      "required": ["ledgerId", "orgId", "divisionId", "branchId", "transactionId", "currency", "grossAmountInMinorUnits", "status", "financialPeriodId"]
+    },
+    "PaymentReconciliationRecord": {
+      "title": "Payment Reconciliation Record",
+      "description": "Authoritative reconciliation mapping gateway payment references against order expectations",
+      "type": "object",
+      "properties": {
+        "reconciliationId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "paymentRef": { "type": "string" },
+        "orderRef": { "type": "string" },
+        "expectedAmountInMinorUnits": { "type": "number" },
+        "receivedAmountInMinorUnits": { "type": "number" },
+        "currency": { "type": "string" },
+        "reconciliationStatus": { "type": "string" }
+      },
+      "required": ["reconciliationId", "orgId", "branchId", "paymentRef", "orderRef", "expectedAmountInMinorUnits", "receivedAmountInMinorUnits", "currency", "reconciliationStatus"]
+    },
+    "FinancialRefundAdjustment": {
+      "title": "Financial Refund and Adjustment",
+      "description": "Controlled financial refund or adjustment event with approval limits",
+      "type": "object",
+      "properties": {
+        "adjustmentId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "originalTransactionId": { "type": "string" },
+        "type": { "type": "string" },
+        "amountInMinorUnits": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string" },
+        "financialPeriodId": { "type": "string" }
+      },
+      "required": ["adjustmentId", "orgId", "originalTransactionId", "type", "amountInMinorUnits", "currency", "status", "financialPeriodId"]
+    },
+    "FinancialPeriod": {
+      "title": "Financial Accounting Period",
+      "description": "Financial period controlling OPEN, LOCKED, and CLOSED accounting states",
+      "type": "object",
+      "properties": {
+        "periodId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["periodId", "orgId", "startDate", "endDate", "status"]
+    },
+    "User": {
+      "title": "User Profile & Membership",
+      "description": "Shared Enterprise Identity profile supporting multi-tenant roles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "role": { "type": "string" },
+        "address": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "Order": {
+      "title": "Garment Care & Product Order",
+      "description": "Order entity isolated by Org, Division, Franchise, and Branch",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orgId": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "userId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "status": { "type": "string" },
+        "amount": { "type": "number" },
+        "items": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "status", "amount"]
+    },
+    "AuditLog": {
+      "title": "Enterprise Audit Log",
+      "description": "Immutable security & operational log record across shared enterprise services",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orgId": { "type": "string" },
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "action", "timestamp"]
+    },
+    "AiInspection": {
+      "title": "Dedicated AI Layer Inspection",
+      "description": "Shared Gemini Multimodal garment scan analysis record available to all divisions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "divisionId": { "type": "string" },
+        "userId": { "type": "string" },
+        "analysisText": { "type": "string", "maxLength": 4000 },
+        "modelUsed": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "analysisText"]
+    },
+    "Vendor": {
+      "title": "Vendor Master Entity",
+      "description": "Controlled Vendor Master record across enterprise procurement",
+      "type": "object",
+      "properties": {
+        "vendorId": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "vendorName": { "type": "string" },
+        "status": { "type": "string" },
+        "complianceStatus": { "type": "string" }
+      },
+      "required": ["vendorId", "organizationId", "vendorName", "status"]
+    },
+    "PurchaseOrder": {
+      "title": "Purchase Order Entity",
+      "description": "Controlled Purchase Order record with versioning and status lifecycle",
+      "type": "object",
+      "properties": {
+        "purchaseOrderId": { "type": "string" },
+        "vendorId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "status": { "type": "string" },
+        "totalAmountInMinorUnits": { "type": "number" }
+      },
+      "required": ["purchaseOrderId", "vendorId", "orgId", "status"]
+    },
+    "IdempotencyRecord": {
+      "title": "Distributed Idempotency Record",
+      "description": "Persistent idempotency key state for multi-instance deduplication and transaction reliability",
+      "type": "object",
+      "properties": {
+        "idempotencyKey": { "type": "string" },
+        "orgId": { "type": "string" },
+        "franchiseId": { "type": "string" },
+        "branchId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userRole": { "type": "string" },
+        "action": { "type": "string" },
+        "endpoint": { "type": "string" },
+        "requestHash": { "type": "string" },
+        "status": { "type": "string" },
+        "statusCode": { "type": "number" },
+        "errorMessage": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "expiresAt": { "type": "string" }
+      },
+      "required": ["idempotencyKey", "orgId", "userId", "requestHash", "status"]
+    },
+    "CatalogImage": {
+      "title": "Catalog Image Asset",
+      "description": "High-definition SVG garment imagery and branding assets for the service catalog",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "highDefUrl": { "type": "string" },
+        "brandPrinted": { "type": "boolean" },
+        "dollMannequinApplied": { "type": "boolean" },
+        "description": { "type": "string" },
+        "lastUpdated": { "type": "string" }
+      },
+      "required": ["itemId", "name", "category", "highDefUrl"]
+    }
+  },
+  "firestore": {
+    "/catalog_images/{imageId}": {
+      "schema": { "$ref": "#/entities/CatalogImage" },
+      "description": "High-definition catalog imagery and garment graphics"
+    },
+    "/idempotency_records/{key}": {
+      "schema": { "$ref": "#/entities/IdempotencyRecord" },
+      "description": "Distributed persistent idempotency records"
+    },
+    "/organizations/{orgId}": {
+      "schema": { "$ref": "#/entities/Organization" },
+      "description": "Master organization records"
+    },
+    "/organizations/{orgId}/divisions/{divisionId}": {
+      "schema": { "$ref": "#/entities/Division" },
+      "description": "Divisions within an organization"
+    },
+    "/organizations/{orgId}/franchises/{franchiseId}": {
+      "schema": { "$ref": "#/entities/Franchise" },
+      "description": "Franchise entities"
+    },
+    "/organizations/{orgId}/franchises/{franchiseId}/agreements/{agreementId}": {
+      "schema": { "$ref": "#/entities/FranchiseAgreement" },
+      "description": "Versioned franchise legal agreements"
+    },
+    "/organizations/{orgId}/branches/{branchId}": {
+      "schema": { "$ref": "#/entities/Branch" },
+      "description": "Branch locations"
+    },
+    "/organizations/{orgId}/vendors/{vendorId}": {
+      "schema": { "$ref": "#/entities/Vendor" },
+      "description": "Enterprise vendor master records"
+    },
+    "/organizations/{orgId}/purchase_orders/{purchaseOrderId}": {
+      "schema": { "$ref": "#/entities/PurchaseOrder" },
+      "description": "Enterprise purchase orders"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Enterprise user profiles with RBAC and isolation tags"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Multi-tenant orders"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Enterprise audit logs"
+    },
+    "/ai_inspections/{inspectionId}": {
+      "schema": { "$ref": "#/entities/AiInspection" },
+      "description": "Shared AI platform garment diagnosis records"
+    },
+    "/idempotency_records/{idempotencyKey}": {
+      "schema": { "$ref": "#/entities/IdempotencyRecord" },
+      "description": "Persistent distributed idempotency locks & cached request replays"
+    },
+    "/tax_classifications/{classificationId}": {
+      "schema": { "$ref": "#/entities/TaxClassification" },
+      "description": "Master HSN and SAC tax codes"
+    },
+    "/tax_schedules/{taxScheduleId}": {
+      "schema": { "$ref": "#/entities/TaxSchedule" },
+      "description": "Versioned HSN/SAC tax schedules and effective date rules"
+    },
+    "/tax_audit_records/{auditId}": {
+      "schema": { "$ref": "#/entities/TaxAuditRecord" },
+      "description": "Append-only tax configuration audit trail"
+    },
+    "/customer_measurements/{measurementProfileId}": {
+      "read": "isAuthenticated() && (resource.data.customerId == request.auth.uid || isStaffOrAdmin())",
+      "write": "isAuthenticated() && (request.resource.data.customerId == request.auth.uid || isStaffOrAdmin())",
+      "schema": {
+        "measurementProfileId": "string",
+        "customerId": "string",
+        "orgId": "string",
+        "profileName": "string",
+        "measurementVersion": "number",
+        "measurements": "object",
+        "notes": "string?",
+        "updatedAt": "string"
+      },
+      "description": "Versioned bespoke tailoring customer measurement profiles"
+    },
+    "/order_inventory_requirements/{requirementId}": {
+      "read": "isAuthenticated() && (isStaffOrAdmin())",
+      "write": "isAuthenticated() && (isStaffOrAdmin())",
+      "schema": {
+        "requirementId": "string",
+        "orderId": "string",
+        "itemId": "string",
+        "sku": "string",
+        "itemName": "string",
+        "orgId": "string",
+        "divisionId": "string",
+        "requiredQuantity": "number",
+        "reservedQuantity": "number",
+        "consumedQuantity": "number",
+        "status": "string",
+        "updatedAt": "string"
+      },
+      "description": "Order-to-inventory requirements, stock reservation & consumption tracking"
+    }
+  }
+}
+
